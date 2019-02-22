@@ -11,11 +11,21 @@ Matric Number - 40280334
 #define HORIZONTAL 3
 #define VERTICAL 3
 
+enum Tile 
+{
+    O = 'O',
+    X = 'X',
+    Empty = '-'
+};
 
 //path
 // C:\Users\darwo\Desktop\All Workspace\Workspace\C and C++ Workspace\Data Structures and Algortihms\Coursework
 
-
+// METHODS
+char * renderGameBoard();
+char * saveGameBoard();
+char * concat(const char *s1, const char *s2);
+void displayBoard(char * board);
 
 char * concat(const char *s1, const char *s2)
 {
@@ -34,11 +44,38 @@ char * concat(const char *s1, const char *s2)
     return result;
 }
 
+void displayBoard(char * board)
+{
+    
+    printf("\n\n\tTic Tac Toe\n\n");
+
+    printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
+
+
+    printf("     |     |     \n");
+    printf("  %c  |  %c  |  %c \n", board[0], board[1], board[2]);
+
+    printf("_____|_____|_____\n");
+    printf("     |     |     \n");
+
+    printf("  %c  |  %c  |  %c \n", board[3], board[4], board[5]);
+
+    printf("_____|_____|_____\n");
+    printf("     |     |     \n");
+
+    printf("  %c  |  %c  |  %c \n", board[6], board[7], board[8]);
+
+    printf("     |     |     \n\n");
+}
+
+
+
 char * renderGameBoard(char *state)
 {
     if(state == NULL || state == "")
     {
         char *newState = "---------";
+
 
         char *board = "";
 
@@ -54,35 +91,32 @@ char * renderGameBoard(char *state)
 
         int count = 0;
 
-        char *board = "";
+        // char *board = "";
+
+        /*
 
         for(int i = 0; i < length; i++)
         {   
-            if( i % 3 == 0)
-            {             
-               board = concat(board, "\n");        
-            }
-
             if(state[i] == '-')
             {            
-                board = concat(board, "_");
-                board = concat(board, "|");              
+                board = concat(board, " ");
+                         
             }
             else if(state[i] == '1')
             {              
                 board = concat(board, "X");
-                board = concat(board, "|");    
+                 
             }
             else if(state[i] == '0')
             {              
                 board = concat(board, "O");
-                board = concat(board, "|");    
+                 
             }
-
         }
+        */
 
-    
-        return board;
+        displayBoard(state);
+        return state;
     }  
 }
 
@@ -97,8 +131,7 @@ char * saveGameBoard(char *board)
     {     
         if(board[i] == '_')
         {            
-            newState = concat(newState, "-");
-           
+            newState = concat(newState, "-");         
                    
         }
         else if(board[i] == 'X')
@@ -112,33 +145,36 @@ char * saveGameBoard(char *board)
              
         }              
     }
-    
+
     return newState;
 }
 
-char * renderGameBoard();
-char * saveGameBoard();
-char * concat(const char *s1, const char *s2);
+
 
 int main(int argc, char ** argv)
-{
-    char *state = NULL;
+{   
+
+
+    char *state = "---X-XOOO";
+
+    int array[9] = {4,5,8,3,2,1};
+
 
     char* board;
     
-    printf(" before method %d\n",&board);
+    //printf(" before method %d\n",&board);
 
     board = renderGameBoard(state);
 
-    printf(" after method %d\n",&board);
+    //printf(" after method %d\n",&board);
 
-    char* newState;
+   // char* newState;
     
-    newState = saveGameBoard(board);
+    //newState = saveGameBoard(board);
 
     
    
-    free(newState);
+    //free(newState);
     free(board);
     free(state);
 
