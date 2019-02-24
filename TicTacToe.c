@@ -7,6 +7,7 @@ Matric Number - 40280334
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include "CircularQueue.h"
 
 #define HORIZONTAL 3
 #define VERTICAL 3
@@ -172,7 +173,18 @@ int main(int argc, char ** argv)
     
     //newState = saveGameBoard(board);
 
-    
+    struct Queue *q;
+
+    initQueue(&q);
+
+    enqueue(&q, "2:X");
+
+    enqueue(&q, "8:X");
+
+    enqueue(&q, "4:X");
+
+    displayQueue(q);
+
    
     //free(newState);
     free(board);
