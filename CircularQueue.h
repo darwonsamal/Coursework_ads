@@ -10,12 +10,13 @@ struct node
 {
     char *move;
 
-    struct node *link;
+    struct node *next;
+    struct node *previous;
 };
 
 struct Queue
 {
-    struct node *front, *rear;
+    struct node *front, *rear, *current;
 };
 
 

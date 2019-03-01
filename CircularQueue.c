@@ -12,12 +12,15 @@ struct node
 {
     char *move;
 
-    struct node *link;
+    struct node *next; 
+    struct node *previous;
+    
 };
 
 struct Queue
 {
-    struct node *front, *rear;
+    struct node *front, *rear, *current;
+  
 };
 
 void initQueue(struct Queue **queue);
@@ -25,13 +28,15 @@ void enqueue(struct Queue **queue, char *move);
 char * dequeue(struct Queue **queue);
 void displayQueue(struct Queue *queue);
 
+
 void initQueue(struct Queue **queue)
 {
     *queue =  (struct Queue *)malloc(sizeof(struct Queue));
     
     (*queue)->front = NULL;
     (*queue)->rear = NULL;
-    
+    (*queue)->current = NULL;
+
 
 }
 
@@ -49,15 +54,19 @@ void enqueue(struct Queue **queue, char *move)
     {   
        
         (*queue)->front = temp;
+        
     }
     else
     {
-        (*queue)->rear->link = temp;
+        (*queue)->rear->next = temp;
+       
     }
 
+    temp->previous = (*queue)->rear;
+
     (*queue)->rear = temp;
-    (*queue)->rear->link = (*queue)->front;
-    
+
+    (*queue)->rear->next = (*queue)->front;
 }
 
 
@@ -79,11 +88,11 @@ void enqueue(struct Queue *queue, char *move)
     }
     else
     {
-        queue->rear->link = temp;
+        queue->rear->next = temp;
     }
 
     queue->rear = temp;
-    queue->rear->link = queue->front;
+    queue->rear->next = queue->front;
     
     
     
@@ -121,9 +130,9 @@ char * dequeue(struct Queue **queue)
 
         move = temp->move;
 
-        (*queue)->front = (*queue)->front->link;
+        (*queue)->front = (*queue)->front->next;
 
-        (*queue)->rear->link = (*queue)->front;
+        (*queue)->rear->next = (*queue)->front;
 
         free(temp);
     }
@@ -139,10 +148,10 @@ void displayQueue(struct Queue *queue)
 
     printf("\n Elements in Circular Queue are: ");
 
-    while(temp->link != queue->front)
+    while(temp->next != queue->front)
     {
         printf("%s\n", temp->move);
-        temp = temp->link;
+        temp = temp->next;
     }
 
     printf("%s", temp->move);
@@ -151,7 +160,7 @@ void displayQueue(struct Queue *queue)
 
 
 
- /* TESTING PURPOSE
+ /* //TESTING PURPOSE
 
 int main()
 {
@@ -165,10 +174,9 @@ int main()
 
     displayQueue(q);
 
-    
-
+   
 
 
 }
-
 */
+
