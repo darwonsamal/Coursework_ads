@@ -27,6 +27,8 @@ void initQueue(struct Queue **queue);
 void enqueue(struct Queue **queue, char *move);
 char * dequeue(struct Queue **queue);
 void displayQueue(struct Queue *queue);
+void updateQueue(struct Queue **queue, char *board);
+
 
 
 void initQueue(struct Queue **queue)
@@ -49,24 +51,33 @@ void enqueue(struct Queue **queue, char *move)
 
     temp->move = move;
 
-
+    
     if((*queue)->front == NULL)
     {   
        
+        temp->next = temp->previous = temp;
+
         (*queue)->front = temp;
         
+        (*queue)->rear = temp;
+
+        (*queue)->rear->next = (*queue)->front;
+      
+        return;
+        
     }
-    else
-    {
-        (*queue)->rear->next = temp;
-       
-    }
+   
+ 
+    temp->next = (*queue)->front;
+
+    (*queue)->front->previous = temp;
 
     temp->previous = (*queue)->rear;
 
-    (*queue)->rear = temp;
+    (*queue)->rear->next = temp;
 
-    (*queue)->rear->next = (*queue)->front;
+    (*queue)->rear = temp;
+   
 }
 
 
@@ -150,13 +161,112 @@ void displayQueue(struct Queue *queue)
 
     while(temp->next != queue->front)
     {
-        printf("%s\n", temp->move);
+       printf("%s", temp->move);
         temp = temp->next;
     }
 
     printf("%s", temp->move);
 }
 
+// FIX ISSUE WITH WHEN IF YOU DO REDO (one move done only) and then play new move, it overrides it, thinking no
+// moves played
+void updateQueue(struct Queue **queue, char *board)
+{
+    struct node *temp = (*queue)->current;
+
+    struct node *next;
+
+    //(temp->next == (*queue)->front)
+
+    if( temp->next == NULL)
+    {
+        printf("GOTCHAAAA\n");
+        return;
+    }
+
+    temp = temp->next;
+
+    while(temp->next != (*queue)->front)
+    {
+        
+        next = temp->next;
+
+        next->previous = temp->previous;
+
+        //printf("\n TEMP MOVEE %s \n", next->previous->move);
+        //printf("\n TEMP MOVEE %s \n", next->next->move);
+        //printf("\n TEMP MOVEE %s \n", next->move);
+
+        free(temp);
+        temp = next;
+    }
+
+
+    if((*queue)->front != temp)
+    {
+          printf("GOTCHAAAA\n");
+        if((*queue)->front == temp->previous)
+        {
+            
+            printf("FOund you bug!\n");
+
+
+            struct node *front = temp->previous;
+
+            free(front);
+
+            temp->previous = NULL;
+            temp->next = NULL;
+
+            free(temp);
+
+            (*queue)->rear = NULL;
+            (*queue)->front = NULL;
+              printf("GOTCHA1\n");
+            (*queue)->current = NULL;
+
+        
+        }
+        else
+        {
+            (*queue)->rear = temp->previous;
+            (*queue)->rear->next = temp->next;
+
+            free(temp);
+
+            (*queue)->current = (*queue)->rear;
+           
+        }
+        
+    }
+    else
+    {   
+
+        int checkIfOldMove = temp->move[0] - '0';
+
+        if(board[checkIfOldMove - 1] == temp->move[0])
+        {   
+           
+             
+            temp->previous = NULL;
+            temp->next = NULL;
+
+            free(temp);
+           
+            (*queue)->rear = NULL;
+            (*queue)->front = NULL;          
+            (*queue)->current = NULL;
+
+
+        }
+       
+        
+    }
+    
+  
+    
+    
+}
 
 
 

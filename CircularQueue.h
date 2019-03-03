@@ -24,3 +24,4 @@ void initQueue(struct Queue **queue);
 void enqueue(struct Queue **queue, char *move);
 char * dequeue(struct Queue **queue);
 void displayQueue(struct Queue *queue);
+void updateQueue(struct Queue **queue, char *board);

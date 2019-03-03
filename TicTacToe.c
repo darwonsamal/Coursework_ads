@@ -9,16 +9,6 @@ Matric Number - 40280334
 #include <ctype.h>
 #include "CircularQueue.h"
 
-#define HORIZONTAL 3
-#define VERTICAL 3
-
-enum Tile 
-{
-    O = 'O',
-    X = 'X',
-    Empty = '-'
-};
-
 //path
 // C:\Users\darwo\Desktop\All Workspace\Workspace\C and C++ Workspace\Data Structures and Algortihms\Coursework
 
@@ -106,6 +96,8 @@ void undoMove(struct Queue **queue, char **board)
 
     //temp node for assignment 
     struct node *temp;
+
+    int flag = 1;
     
     // if empty then do nothing
     if((*queue)->front == NULL || (*queue)->rear == NULL)
@@ -123,28 +115,50 @@ void undoMove(struct Queue **queue, char **board)
         //set temp as current
 
         temp = (*queue)->current;
+         
 
     }
     else // else then set temp to current
     {
         temp = (*queue)->current;
-
+       
         
     }
+
+    int checkIfOldMove = temp->move[0] - '0';
+
+    if((*board)[checkIfOldMove - 1] == temp->move[0])
+    {   
+            
+        temp = temp->previous;  
+
+        (*queue)->current = temp;
+
+
+    }
+
     // get position of the move played
     char charPosition = temp->move[0];
     //convert it to integer
     int position = charPosition - '0';
     //set board position to empty (which is the number of the position);
     (*board)[position - 1] = charPosition;
+    
     // if back to original state (empty) then do not update current for there is no more undos to do
-    if(temp->previous == NULL)
+    if(temp->previous == NULL || temp->previous == (*queue)->rear)
     {
         return;
     }
 
+   
+
     //update current so it is the previous node which means the next old move played
+   
     (*queue)->current = temp->previous;
+   
+    
+
+    
     
 }
 
@@ -159,6 +173,8 @@ void redoMove(struct Queue **queue, char **board)
     // if queue is empty then return and do nothing
     if((*queue)->front == NULL || (*queue)->rear == NULL)
     {
+
+        printf("YOOOOOO1");
         return;
     } // else checking if current node is front
     else if((*queue)->current == (*queue)->front)
@@ -166,12 +182,22 @@ void redoMove(struct Queue **queue, char **board)
 
         temp = (*queue)->current;
 
+        printf("\n temp -> %s \n", temp->move);
+        printf("\n temp -> %s \n", temp->previous->move);
+        printf("\n temp -> %s \n", temp->next->move);
+
         // CHECK TO see if current (which is front) needs redo or is it the next node that needs redo
         int checkIfOldMove = temp->move[0] - '0';
 
+           printf("\n temp -> %c \n", temp->move[0]);
+              printf("\n temp -> %c \n", (*board)[checkIfOldMove - 1]);
         // check to see if a move is played at this current node, if so then we redo the next one and not this one
         if((*board)[checkIfOldMove - 1] != temp->move[0])
         {   
+
+             printf("\n temp -> %s \n", temp->move);
+        printf("\n temp -> %s \n", temp->previous->move);
+        printf("\n temp -> %s \n", temp->next->move);
             
             temp = temp->next;
 
@@ -188,10 +214,16 @@ void redoMove(struct Queue **queue, char **board)
         //redo empty position with the move 
         (*board)[position - 1] = temp->move[2];
 
+
+        
+
         // if current node is not updated then do so
         if(flag == 1)
         {
 
+            printf("FOund you bug 2");
+
+            
            
             (*queue)->current = temp->next;
         }
@@ -209,6 +241,10 @@ void redoMove(struct Queue **queue, char **board)
     {
 
         temp = (*queue)->current;
+
+          printf("\n temp -> %s \n", temp->move);
+        printf("\n temp -> %s \n", temp->previous->move);
+        printf("\n temp -> %s \n", temp->next->move);
 
         int checkIfOldMove = temp->move[0] - '0';
 
@@ -247,6 +283,10 @@ void redoMove(struct Queue **queue, char **board)
         }
 
     }
+
+     printf("\n temp -> %s \n", (*queue)->current->move);
+        printf("\n temp -> %s \n", (*queue)->current->previous->move);
+        printf("\n temp -> %s \n", (*queue)->current->next->move);
     
   
 }
@@ -423,14 +463,45 @@ int main(int argc, char ** argv)
         }
         else if ((strcmp(choice, "undo") == 0) && (firstMovePlayed == 1)) 
         {
+           
+            newMoveFlag = 0;
+
             undoMove(&queue, &board);
             playerTurn--;
         }
         else if(strcmp(choice, "redo") == 0 && (firstMovePlayed == 1))
         {
-            redoMove(&queue, &board);
 
-            playerTurn++;
+
+           
+            newMoveFlag = 0;
+
+            if(queue->current != queue->rear)
+            {
+
+                printf("\n BACCCCKKKKKK \n");
+                redoMove(&queue, &board);
+
+                playerTurn++;
+            }
+            else if(queue->current == queue->front && queue->current == queue->rear)
+            {
+                printf("\n BACCCCKKKKKK 22 \n");
+                redoMove(&queue, &board);
+
+                playerTurn++;
+            }
+            else
+            {
+                printf("\n BACCCCKKKKKK 3 %s \n", queue->current->move);
+
+                redoMove(&queue, &board);
+
+                
+
+            }
+            
+            
            
         }
         else if (atoi(choice) < 10 && atoi(choice) > 0)
@@ -438,6 +509,10 @@ int main(int argc, char ** argv)
 
             if(newMoveFlag == 0)
             {
+
+                newMoveFlag = 1;
+
+                updateQueue(&queue, board);
 
 
             }
@@ -469,10 +544,13 @@ int main(int argc, char ** argv)
 
             board = generateGameBoard(queue);
 
+            queue->current = queue->rear;
 
             firstMovePlayed = 1;
             
             playerTurn++;
+
+            displayQueue(queue);
         }
         else
         {
@@ -486,10 +564,21 @@ int main(int argc, char ** argv)
                 printf("\nCommand not recognized, try again\n");
             }
                
-        }      
+        }  
 
-       
-            displayBoard(board);
+        if(playerTurn > 9)
+        {
+            playerTurn = 9;
+        }
+        else if(playerTurn <= 0)
+        {
+            playerTurn = 1;
+        }
+
+        
+        displayBoard(board);
+        displayQueue(queue);
+        printf("\nplayerTurn == %d\n", playerTurn);
        
     }
 
