@@ -7,7 +7,9 @@ Matric Number - 40280334
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "CircularQueue.h"
+#include "Queue.h"
+
+#define MAX 9
 
 //path
 // C:\Users\darwo\Desktop\All Workspace\Workspace\C and C++ Workspace\Data Structures and Algortihms\Coursework
@@ -15,14 +17,25 @@ Matric Number - 40280334
 // METHODS
 //char * renderGameBoard();
 //char * saveGameBoard();
+
 char * concat(const char *string1, const char *string2);
 void displayBoard(char *board);
 void showHelp();
 void input(char **choice);
 void removeNewline(char **str);
-char * generateGameBoard(struct Queue *queue);
-void undoMove(struct Queue **queue, char **board);
-void redoMove(struct Queue **queue, char **board);
+void saveToFile(char *totalMoves);
+void loadFile(char *fileName);
+
+int checkValidMove(char *move, char *board);
+int checkIfGameIsWon(char *board);
+
+//char * generateGameBoard(struct Queue *queue);
+//void undoMove(struct Queue **queue, char **board, char **totalMoves);
+//void redoMove(struct Queue **queue, char **board, char **totalMoves);
+
+void generateGameBoard(char ***queue, char **board, int rear);
+void undoMove(char ***queue, int *front, int *rear, int *current, char **board, char **totalMoves);
+void redoMove(char ***queue, int *front, int *rear, int *current, char **board, char **totalMoves);
 
 
 //TODO:ask about input function (passing values , potential memory leak)
@@ -31,6 +44,7 @@ void redoMove(struct Queue **queue, char **board);
 char * concat(const char *string1, const char *string2)
 {
 
+    
     const size_t len1 = strlen(string1);
 
     const size_t len2 = strlen(string2);
@@ -60,6 +74,106 @@ void displayBoard(char *board)
 }
 
 
+
+void showHelp()
+{
+    
+    printf("\n\n\t\tThe way this game works is that you\n");
+    printf("\t\tchoose a block numbered \n\t\tfrom 1 to 9 as below"
+            " and play. \n\n"); 
+      
+    printf("\t\t\t  1 | 2  | 3  \n"); 
+    printf("\t\t\t--------------\n"); 
+    printf("\t\t\t  4 | 5  | 6  \n"); 
+    printf("\t\t\t--------------\n"); 
+    printf("\t\t\t  7 | 8  | 9  \n\n"); 
+      
+
+}
+
+
+void input(char **choice)
+{   
+      
+    fgets(*choice, 20, stdin);
+
+    removeNewline(&(*choice));   
+
+    //printf("%d -- inside method\n",&(*choice));
+
+}
+
+void removeNewline(char **str)
+{
+    int len = strlen(*str);
+
+    if (len > 0 && (*str)[len - 1] == '\n')
+    {
+      //printf("remive new line\n");
+      (*str)[len - 1] = '\0';
+    }
+        
+}
+
+
+void saveToFile(char *totalMoves)
+{
+    FILE *outputFile = fopen("save.txt", "w");
+
+    int length = strlen(totalMoves);
+
+    fprintf(outputFile, "%s", totalMoves, length + 1);
+
+    fclose(outputFile);
+    
+}
+
+
+void loadFile(char *fileName)
+{
+    FILE *inputFile = fopen(fileName, "r");
+
+    char buffer[4];
+
+    while(!feof(inputFile))
+    {
+        fgets(buffer,4, inputFile);
+
+        printf("%s", buffer);
+    }
+}
+
+
+int checkValidMove(char *move, char *board)
+{
+    char checkCharPosition = move[0];
+
+    int checkPosition = checkCharPosition - '0';
+
+    if(board[checkPosition - 1] == 'O' || board[checkPosition - 1] == 'X')
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+    
+    return 0;
+
+}
+
+int checkIfGameIsWon(char *board)
+{
+    return 0;
+}
+
+
+// FOR CIRCULAR QUEUE
+
+
+/*
+
 char * generateGameBoard(struct Queue *queue)
 {
     char * board = "123456789";
@@ -88,19 +202,31 @@ char * generateGameBoard(struct Queue *queue)
     printf(board);
     return board;
     
-}
+}*/
 
-
-void undoMove(struct Queue **queue, char **board)
+/*
+void undoMove(struct Queue **queue, char **board, char **totalMoves)
 {
 
     //temp node for assignment 
     struct node *temp;
 
     int flag = 1;
+
+
     
     // if empty then do nothing
     if((*queue)->front == NULL || (*queue)->rear == NULL)
+    {
+        return;
+    }
+
+  
+    char checkCharPosition = (*queue)->current->move[0];
+    //convert it to integer
+    int checkPosition = checkCharPosition - '0';
+
+    if((*queue)->current == (*queue)->front && (*board)[checkPosition - 1] == checkCharPosition)
     {
         return;
     }
@@ -121,6 +247,9 @@ void undoMove(struct Queue **queue, char **board)
     else // else then set temp to current
     {
         temp = (*queue)->current;
+
+        
+     
        
         
     }
@@ -131,6 +260,16 @@ void undoMove(struct Queue **queue, char **board)
     {   
             
         temp = temp->previous;  
+
+        
+    char *redoMove = "";
+
+    strcpy(redoMove, temp->move);
+
+    redoMove[2] = redoMove[0];
+
+    (*totalMoves) = concat((*totalMoves), redoMove);
+    (*totalMoves) = concat((*totalMoves), "\n");
 
         (*queue)->current = temp;
 
@@ -143,10 +282,22 @@ void undoMove(struct Queue **queue, char **board)
     int position = charPosition - '0';
     //set board position to empty (which is the number of the position);
     (*board)[position - 1] = charPosition;
+
+
+    char *redoMove = "";
+
+    strcpy(redoMove, temp->move);
+
+    redoMove[2] = redoMove[0];
+
+    (*totalMoves) = concat((*totalMoves), redoMove);
+    (*totalMoves) = concat((*totalMoves), "\n");
     
     // if back to original state (empty) then do not update current for there is no more undos to do
     if(temp->previous == NULL || temp->previous == (*queue)->rear)
     {
+
+        printf("ENNETERED\n");
         return;
     }
 
@@ -162,7 +313,7 @@ void undoMove(struct Queue **queue, char **board)
     
 }
 
-void redoMove(struct Queue **queue, char **board)
+void redoMove(struct Queue **queue, char **board, char **totalMoves)
 {
     //temp node for assignment 
     struct node *temp;
@@ -170,11 +321,19 @@ void redoMove(struct Queue **queue, char **board)
     // flag to check it current needs updating in certain cases
     int flag = 1;
 
-    // if queue is empty then return and do nothing
-    if((*queue)->front == NULL || (*queue)->rear == NULL)
+    char checkCharPosition = (*queue)->current->move[0];
+  
+    int checkPosition = checkCharPosition - '0';
+
+    if((*queue)->current == (*queue)->rear && (*board)[checkPosition - 1] == (*queue)->current->move[2])
     {
 
-        printf("YOOOOOO1");
+        return;
+    }
+
+    // if queue is empty then return and do nothing
+    if((*queue)->front == NULL || (*queue)->rear == NULL)
+    {    
         return;
     } // else checking if current node is front
     else if((*queue)->current == (*queue)->front)
@@ -215,6 +374,13 @@ void redoMove(struct Queue **queue, char **board)
         (*board)[position - 1] = temp->move[2];
 
 
+        char *redoMove = "";
+
+        strcpy(redoMove, temp->move);
+
+        (*totalMoves) = concat((*totalMoves), redoMove);
+        (*totalMoves) = concat((*totalMoves), "\n");
+        
         
 
         // if current node is not updated then do so
@@ -259,6 +425,15 @@ void redoMove(struct Queue **queue, char **board)
 
             (*board)[position - 1] = temp->move[2];
 
+            char *redoMove = "";
+
+            strcpy(redoMove, temp->move);
+
+            (*totalMoves) = concat((*totalMoves), redoMove);
+            (*totalMoves) = concat((*totalMoves), "\n");
+
+
+
         }
         else
         {
@@ -268,6 +443,13 @@ void redoMove(struct Queue **queue, char **board)
             int position = charPosition - '0';
 
             (*board)[position - 1] = temp->next->move[2];
+
+            char *redoMove = "";
+
+            strcpy(redoMove, temp->next->move);
+
+            (*totalMoves) = concat((*totalMoves), redoMove);
+            (*totalMoves) = concat((*totalMoves), "\n");
 
 
             // if we in the end of the queue(rear) this means we got no more moves to redo so we return or check if queue is empty
@@ -290,135 +472,128 @@ void redoMove(struct Queue **queue, char **board)
     
   
 }
+*/
+
+// FOR QUEUE
 
 
-void showHelp()
+void generateGameBoard(char ***queue, char **board, int rear)
 {
     
-    printf("\n\n\t\tThe way this game works is that you\n");
-    printf("\t\tchoose a block numbered \n\t\tfrom 1 to 9 as below"
-            " and play. \n\n"); 
-      
-    printf("\t\t\t  1 | 2  | 3  \n"); 
-    printf("\t\t\t--------------\n"); 
-    printf("\t\t\t  4 | 5  | 6  \n"); 
-    printf("\t\t\t--------------\n"); 
-    printf("\t\t\t  7 | 8  | 9  \n\n"); 
-      
+    char *move = (*queue)[rear];
+    char position = move[0];
 
-}
+        printf("\n -- position --%c\n", position);
 
+    char charMove = move[1];
 
-void input(char **choice)
-{   
-      
-    fgets(*choice, 20, stdin);
+        printf("\n -- move --%c\n", charMove);      
 
-    removeNewline(&(*choice));   
+    int comparePosition = position - '0';
 
-    //printf("%d -- inside method\n",&(*choice));
+        printf("%d\n", comparePosition);
 
-}
+    (*board)[comparePosition - 1] = charMove;
 
-void removeNewline(char **str)
-{
-    int len = strlen(*str);
-
-    if (len > 0 && (*str)[len - 1] == '\n')
-    {
-      //printf("remive new line\n");
-      (*str)[len - 1] = '\0';
-    }
-        
-}
-
-
-/*
-char * renderGameBoard(char *state)
-{
-    if(state == NULL || state == "")
-    {
-        char *newState = "123456789";
-
-
-        char *board = "";
-
-        board = renderGameBoard(newState);
-
-        return board;
-
-    }
-    else
-    {
-        
-        int length = strlen(state);
-
-        int count = 0;
-
-        // char *board = "";
-
-        /*
-
-        for(int i = 0; i < length; i++)
-        {   
-            if(state[i] == '-')
-            {            
-                board = concat(board, " ");
-                         
-            }
-            else if(state[i] == '1')
-            {              
-                board = concat(board, "X");
-                 
-            }
-            else if(state[i] == '0')
-            {              
-                board = concat(board, "O");
-                 
-            }
-        }
-     
-
-        //displayBoard(state);
-        return state;
-    }  
-}
-
-char * saveGameBoard(char *board)
-{
-    int length = strlen(board);
-
-    char* newState = "";
-
+    printf((*board));
    
-    for(int i = 0; i < length; i++)
-    {     
-        if(board[i] == '_')
-        {            
-            newState = concat(newState, "-");         
-                   
-        }
-        else if(board[i] == 'X')
-        {              
-            newState = concat(newState, "1");
-            
-        }
-        else if(board[i] == 'O')
-        {              
-            newState = concat(newState, "0");
-             
-        }              
-    }
-
-    return newState;
+    
 }
 
-*/
+void undoMove(char ***queue, int *front, int *rear, int *current, char **board, char **totalMoves)
+{
+    
+    
+
+    char checkCharPosition = (*queue)[*current][0];
+
+    int checkPosition = checkCharPosition - '0';
+
+    printf("\n %d YOO \n", checkPosition);
+
+    if((*queue)[*current] == (*queue)[1] && (*board)[checkPosition - 1] == checkCharPosition)
+    {   
+        printf("Yo\n");
+        return;
+
+    }
+
+    (*board)[checkPosition - 1] = (*queue)[*current][0];
+
+    printf("\n %d YOO \n", *current);
+
+    if((*queue)[*current] != (*queue)[1])
+    {
+        *current = *current - 1;
+    }
+   
+
+    printf("\n %d YOO \n", *current);
+
+
+}
+
+void redoMove(char ***queue, int *front, int *rear, int *current, char **board, char **totalMoves)
+{
+    char checkCharPosition = (*queue)[*current][0];
+
+    int flag = 0;
+
+    printf("\n %c \n", checkCharPosition);
+
+    printf("\n %s \n", (*queue)[1]);
+
+    int checkPosition = checkCharPosition - '0';
+    
+    if((*queue)[*current] == (*queue)[1] && (*board)[checkPosition - 1] == checkCharPosition)
+    {
+        printf("Yo22\n");
+        //CODE here and u done with redo
+
+        flag = 1;
+
+
+    }
+
+
+
+    if((*queue)[*current] == (*queue)[*rear] && (*board)[checkPosition - 1] == (*queue)[*current][1])
+    {
+          printf("Yo33\n");
+        return;
+    }
+
+
+    if(flag == 0 && (*queue)[*current] != (*queue)[*rear])
+    {
+        
+        *current = *current + 1;
+
+    }
+    
+
+    checkCharPosition =  (*queue)[*current][0];
+
+    checkPosition = checkCharPosition - '0';
+
+    (*board)[checkPosition - 1] = (*queue)[*current][1];
+    
+    
+
+    printf("\n %d YOO \n", *current);
+
+}
+
+
 
 int main(int argc, char ** argv)
 {   
 
-    int gameRunning = 1;
+    int gameRunning = 0;
+
+    int checkIfGameIsWonFlag = 1;
+
+    char *totalMoves = "";
 
     int playerTurn = 1;
 
@@ -428,17 +603,19 @@ int main(int argc, char ** argv)
 
     char *playerMove = ":X";
 
-    struct Queue * queue; 
+    char **queue = initQueue();
+
+    int rear = -1;
+    int current = 0;
+    int front = 1;
 
     char * board = "123456789";
-
-    initQueue(&queue);
 
     char  *choice  = (char *)malloc(20);
 
     displayBoard(board);
-
-    while (gameRunning == 1)
+    
+    while (gameRunning == 0)
     {   
 
        
@@ -449,45 +626,80 @@ int main(int argc, char ** argv)
         printf("your choice: %s \n", choice);
 
         //printf("%d -- in main method\n",&choice);
+
         
-        if(strcmp(choice, "help") == 0) /*|| (strcmp(choice, "Help") == 0)*/
+        
+        if((strcmp(choice, "help") == 0) || (strcmp(choice, "Help") == 0))
         {
             showHelp();
           
         }
-        else if(strcmp(choice, "exit") == 0 /*|| (strcmp(choice, "Exit") == 0)*/)
+        else if(strcmp(choice, "save") == 0)
         {
-            gameRunning = 0;
+            saveToFile(totalMoves);
+        }
+        else if(strcmp(choice, "load") == 0)
+        {
+            loadFile("save.txt");
+        }
+        else if((strcmp(choice, "exit") == 0) || (strcmp(choice, "Exit") == 0))
+        {
+            gameRunning = 1;
             printf("\nExiting game...");
             break;
         }
-        else if ((strcmp(choice, "undo") == 0) && (firstMovePlayed == 1)) 
+        else if (strcmp(choice, "undo") == 0) 
         {
+            if(rear == -1)
+            {
+                printf("Nothing to undo.\n");
+                continue;
+            }
            
             newMoveFlag = 0;
 
-            undoMove(&queue, &board);
+            undoMove(&queue, &front, &rear, &current, &board, &totalMoves);
+
             playerTurn--;
         }
-        else if(strcmp(choice, "redo") == 0 && (firstMovePlayed == 1))
+        else if(strcmp(choice, "redo") == 0)
         {
 
-
-           
+            if(rear == -1)
+            {
+                printf("Nothing to redo.\n");
+                continue;
+            }
+         
             newMoveFlag = 0;
+
+            char checkCharPosition = queue[current][0];
+
+            int checkPosition = checkCharPosition - '0';
+      
+            if(queue[current] != queue[rear] || (queue[front] == queue[current] && board[checkPosition - 1] == checkCharPosition))
+            {
+                playerTurn++;
+            }
+
+
+            redoMove(&queue, &front, &rear, &current, &board, &totalMoves);
+
+
+            /*
 
             if(queue->current != queue->rear)
             {
 
                 printf("\n BACCCCKKKKKK \n");
-                redoMove(&queue, &board);
+                redoMove(&queue, &board, &totalMoves);
 
                 playerTurn++;
             }
             else if(queue->current == queue->front && queue->current == queue->rear)
             {
                 printf("\n BACCCCKKKKKK 22 \n");
-                redoMove(&queue, &board);
+                redoMove(&queue, &board, &totalMoves);
 
                 playerTurn++;
             }
@@ -495,13 +707,14 @@ int main(int argc, char ** argv)
             {
                 printf("\n BACCCCKKKKKK 3 %s \n", queue->current->move);
 
-                redoMove(&queue, &board);
-
+                redoMove(&queue, &board, &totalMoves);
                 
 
+
             }
+            */
             
-            
+                   
            
         }
         else if (atoi(choice) < 10 && atoi(choice) > 0)
@@ -512,75 +725,102 @@ int main(int argc, char ** argv)
 
                 newMoveFlag = 1;
 
-                updateQueue(&queue, board);
+                
+                if(queue[current] != queue[rear])
+                {
+                    updateQueue(&queue, &front, &rear, &current, board);
+                }
+                
+               
 
 
             }
             if(playerTurn >= 9)
             {
-                gameRunning = 0;
-                printf("game over");
+                break;
             }
             if(playerTurn % 2 == 0)
             {
                 printf("\nplayer %d\n", 2);
 
-                playerMove = ":O";
+                playerMove = "O";
             }
             else
             {
                printf("\nplayer %d\n", 1);          
 
-               playerMove = ":X";
+               playerMove = "X";
             }
             
             
             char * move = concat(choice, playerMove);
 
+            int checkValidMoveFlag = checkValidMove(move, board);
+
             printf("\n -- move played --%s\n",move);
 
-    
-            enqueue(&queue, move);
+            if (checkValidMoveFlag == 0)
+            {
+                totalMoves = concat(totalMoves, move);
 
-            board = generateGameBoard(queue);
+                totalMoves = concat(totalMoves, "\n");
 
-            queue->current = queue->rear;
+                enqueue(&queue, move, &front, &rear, &current);
 
-            firstMovePlayed = 1;
+                generateGameBoard(&queue, &board, rear);
+
+                printf("\n %s \n", queue[rear]);
+
+                firstMovePlayed = 1;
             
-            playerTurn++;
+                playerTurn++;
 
-            displayQueue(queue);
+
+            }
+            else
+            {
+                printf("Invalid move!\n");
+            }
+
+          
         }
         else
         {
 
-            if(firstMovePlayed == 0)
-            {
-                printf("\n You must play a move first to undo or redo\n");
-            }
-            else
-            {
-                printf("\nCommand not recognized, try again\n");
-            }
+            
+            printf("\nCommand not recognized, try again\n");
+            
                
         }  
 
-        if(playerTurn > 9)
+        
+
+        if(playerTurn >= 9)
         {
             playerTurn = 9;
+
+            gameRunning = 1;
+
+
         }
         else if(playerTurn <= 0)
         {
             playerTurn = 1;
         }
 
-        
+        checkIfGameIsWonFlag = checkIfGameIsWon(board);
+
+        if(checkIfGameIsWonFlag == 0)
+        {
+            
+        }
         displayBoard(board);
-        displayQueue(queue);
+       
         printf("\nplayerTurn == %d\n", playerTurn);
        
     }
+    
+    
 
     return 0;
 }

@@ -4,7 +4,7 @@ clean:
 	del *.lib
 
 build:
-	cl /c CircularQueue.c
-	lib /OUT:TicTacToeLib.lib CircularQueue.obj
+	cl /c Queue.c
+	lib /OUT:TicTacToeLib.lib Queue.obj
 	cl /c TicTacToe.c
 	link TicTacToe.obj TicTacToeLib.lib 

@@ -174,13 +174,18 @@ void updateQueue(struct Queue **queue, char *board)
 {
     struct node *temp = (*queue)->current;
 
+    
+        printf("\n temp -> %s \n", temp->move);
+        printf("\n temp -> %s \n", temp->previous->move);
+        printf("\n temp -> %s \n", temp->next->move);
+
     struct node *next;
 
     //(temp->next == (*queue)->front)
 
     if( temp->next == NULL)
     {
-        printf("GOTCHAAAA\n");
+      
         return;
     }
 
@@ -204,13 +209,10 @@ void updateQueue(struct Queue **queue, char *board)
 
     if((*queue)->front != temp)
     {
-          printf("GOTCHAAAA\n");
+          
         if((*queue)->front == temp->previous)
         {
             
-            printf("FOund you bug!\n");
-
-
             struct node *front = temp->previous;
 
             free(front);
@@ -222,7 +224,7 @@ void updateQueue(struct Queue **queue, char *board)
 
             (*queue)->rear = NULL;
             (*queue)->front = NULL;
-              printf("GOTCHA1\n");
+             
             (*queue)->current = NULL;
 
         

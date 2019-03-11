@@ -8,14 +8,24 @@ Matric Number - 40280334
 #include <string.h>
 #include <ctype.h>
 
-
-int arr[MAX];
-int front = -1, rear = -1;
+#define MAX 9
 
 
+char ** initQueue()
+{
+    char **array = malloc(MAX * sizeof(char*));
+
+    for(int i = 0; i < MAX; i++)
+    {
+        array[i] = malloc(2 * sizeof(char) + 1);
+
+    }
+
+    return array;
+}
 
 
-void enqueue(int *arr, int item, int *pfront, int *prear)
+void enqueue(char ***arr, char *move , int *pfront, int *prear, int *current)
 {
 
     if(*prear == MAX - 1)
@@ -25,9 +35,18 @@ void enqueue(int *arr, int item, int *pfront, int *prear)
     }
     else
     {
-        printf("Enqueueing: %d\n", item);
+
+        if((*prear) < 0)
+        {
+            (*prear) = 0;
+        }
+
+      
         (*prear)++;
-        arr[*prear] = item;
+        (*arr)[*prear] = move;
+          printf("Enqueueing: %d\n", *prear);
+
+        *current = *prear;
 
         if(*pfront == -1)
         {
@@ -52,13 +71,11 @@ int empty(int *pfront)
     
 }
 
-int dequeue(int *arr, int *pfront, int *prear)
+char * dequeue(char ***arr, int *pfront, int *prear)
 {
-    int data = arr[*pfront];
+    char *data = (*arr)[*pfront];
 
-    printf("Dequeueing: %d\n", data);
-
-    arr[*pfront] = 0;
+    (*arr)[*pfront] = 0;
 
     if(*pfront == *prear)
     {
@@ -71,4 +88,44 @@ int dequeue(int *arr, int *pfront, int *prear)
     
     return data;
     
+}
+
+void updateQueue(char ***queue, int *front, int *rear, int *current, char *board)
+{
+
+    if((*queue)[*current] == (*queue)[*rear])
+    {
+        return;
+    }
+
+    for(int i = *current + 1; i <= *rear; i++)
+    {
+
+        (*queue)[i] = "";
+
+        printf("\n %s \n", (*queue)[i]);
+    }
+
+    printf("\n %s \n", (*queue)[*current]);
+
+    *rear = *current;
+
+    char checkCharPosition = (*queue)[*current][0];
+
+    int checkPosition = checkCharPosition - '0';
+
+    printf("\n %s \n", (*queue)[*front]);
+
+    if((*queue)[*current] == (*queue)[*front] && board[checkPosition - 1] == checkCharPosition )
+    {
+        (*queue)[*current] = "";
+        (*queue)[*front] = "";
+        (*queue)[*rear] = "";
+
+        *rear = -1;
+        *current = 0;
+        *front = 1;
+    }
+
+      
 }
