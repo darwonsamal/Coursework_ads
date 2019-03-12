@@ -163,8 +163,17 @@ int checkValidMove(char *move, char *board)
 
 }
 
-int checkIfGameIsWon(char *board)
+int checkIfGameIsWon(char *move)
 {
+
+    char position = move[0];
+
+    char movePlayed = move[1];
+
+    int checkPosition = position - '0';
+
+    //check if won by every move played not the board
+
     return 0;
 }
 
@@ -481,22 +490,15 @@ void generateGameBoard(char ***queue, char **board, int rear)
 {
     
     char *move = (*queue)[rear];
-    char position = move[0];
-
-        printf("\n -- position --%c\n", position);
+    char position = move[0]; 
 
     char charMove = move[1];
-
-        printf("\n -- move --%c\n", charMove);      
-
+    
     int comparePosition = position - '0';
-
-        printf("%d\n", comparePosition);
 
     (*board)[comparePosition - 1] = charMove;
 
     printf((*board));
-   
     
 }
 
@@ -509,18 +511,18 @@ void undoMove(char ***queue, int *front, int *rear, int *current, char **board, 
 
     int checkPosition = checkCharPosition - '0';
 
-    printf("\n %d YOO \n", checkPosition);
+    
 
     if((*queue)[*current] == (*queue)[1] && (*board)[checkPosition - 1] == checkCharPosition)
     {   
-        printf("Yo\n");
+     
         return;
 
     }
 
     (*board)[checkPosition - 1] = (*queue)[*current][0];
 
-    printf("\n %d YOO \n", *current);
+    
 
     if((*queue)[*current] != (*queue)[1])
     {
@@ -528,7 +530,7 @@ void undoMove(char ***queue, int *front, int *rear, int *current, char **board, 
     }
    
 
-    printf("\n %d YOO \n", *current);
+    
 
 
 }
@@ -539,19 +541,13 @@ void redoMove(char ***queue, int *front, int *rear, int *current, char **board, 
 
     int flag = 0;
 
-    printf("\n %c \n", checkCharPosition);
-
-    printf("\n %s \n", (*queue)[1]);
 
     int checkPosition = checkCharPosition - '0';
     
     if((*queue)[*current] == (*queue)[1] && (*board)[checkPosition - 1] == checkCharPosition)
     {
-        printf("Yo22\n");
-        //CODE here and u done with redo
-
+   
         flag = 1;
-
 
     }
 
@@ -559,7 +555,7 @@ void redoMove(char ***queue, int *front, int *rear, int *current, char **board, 
 
     if((*queue)[*current] == (*queue)[*rear] && (*board)[checkPosition - 1] == (*queue)[*current][1])
     {
-          printf("Yo33\n");
+       
         return;
     }
 
@@ -580,7 +576,7 @@ void redoMove(char ***queue, int *front, int *rear, int *current, char **board, 
     
     
 
-    printf("\n %d YOO \n", *current);
+  
 
 }
 
@@ -602,6 +598,8 @@ int main(int argc, char ** argv)
     int firstMovePlayed = 0;
 
     char *playerMove = ":X";
+
+    char *move;
 
     char **queue = initQueue();
 
@@ -753,7 +751,7 @@ int main(int argc, char ** argv)
             }
             
             
-            char * move = concat(choice, playerMove);
+            move = concat(choice, playerMove);
 
             int checkValidMoveFlag = checkValidMove(move, board);
 
@@ -768,8 +766,6 @@ int main(int argc, char ** argv)
                 enqueue(&queue, move, &front, &rear, &current);
 
                 generateGameBoard(&queue, &board, rear);
-
-                printf("\n %s \n", queue[rear]);
 
                 firstMovePlayed = 1;
             
@@ -808,7 +804,7 @@ int main(int argc, char ** argv)
             playerTurn = 1;
         }
 
-        checkIfGameIsWonFlag = checkIfGameIsWon(board);
+        checkIfGameIsWonFlag = checkIfGameIsWon(move);
 
         if(checkIfGameIsWonFlag == 0)
         {
