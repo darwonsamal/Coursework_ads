@@ -8,3 +8,6 @@ build:
 	lib /OUT:TicTacToeLib.lib Queue.obj
 	cl /c TicTacToe.c
 	link TicTacToe.obj TicTacToeLib.lib 
+
+cleanSaves:
+	del *.txt

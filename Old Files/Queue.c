@@ -8,7 +8,7 @@ Matric Number - 40280334
 #include <string.h>
 #include <ctype.h>
 
-#define MAX 9
+#define MAX 10
 
 
 char ** initQueue()
@@ -28,7 +28,7 @@ char ** initQueue()
 void enqueue(char ***arr, char *move , int *pfront, int *prear, int *current)
 {
 
-    if(*prear == MAX - 1)
+    if(*prear == MAX)
     {
         printf("Queue is full\n");
         return;
@@ -44,7 +44,9 @@ void enqueue(char ***arr, char *move , int *pfront, int *prear, int *current)
       
         (*prear)++;
         (*arr)[*prear] = move;
-          printf("Enqueueing: %d\n", *prear);
+
+        printf("%sQUEUE\n", (*arr)[*prear]);
+        
 
         *current = *prear;
 
@@ -69,6 +71,22 @@ int empty(int *pfront)
         return 0;
     }
     
+}
+
+void emptyQueue(char ***arr, int rear)
+{
+
+    printf("Emptying Queue\n");
+
+    for(int i = 1; i < MAX; i++)
+    {   
+
+        (*arr)[i] = NULL;
+        free((*arr)[i]);    
+       
+    }
+   
+    free((*arr));
 }
 
 char * dequeue(char ***arr, int *pfront, int *prear)
@@ -103,10 +121,8 @@ void updateQueue(char ***queue, int *front, int *rear, int *current, char *board
 
         (*queue)[i] = "";
 
-        printf("\n %s \n", (*queue)[i]);
-    }
-
-    printf("\n %s \n", (*queue)[*current]);
+       
+    } 
 
     *rear = *current;
 
@@ -114,7 +130,7 @@ void updateQueue(char ***queue, int *front, int *rear, int *current, char *board
 
     int checkPosition = checkCharPosition - '0';
 
-    printf("\n %s \n", (*queue)[*front]);
+   
 
     if((*queue)[*current] == (*queue)[*front] && board[checkPosition - 1] == checkCharPosition )
     {
